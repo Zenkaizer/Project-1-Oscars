@@ -1,4 +1,3 @@
-import pandas
 from Webscraping import Webscraping
 
 
@@ -7,19 +6,19 @@ class ETL:
     def __init__(self, connection):
         self.dataframe = None
         self.connection = connection
-        self.webscrap = Webscraping()
+        self.scrap = Webscraping()
 
     def __extract(self):
-        self.dataframe = self.webscrap.get_dataframe()
+        self.dataframe = self.scrap.get_dataframe()
 
     def __transform(self):
-        self.dataframe['film_nominations'] = self.dataframe['film_nominations'].astype(int)
-        self.dataframe['film_awards'] = self.dataframe['film_awards'].astype(int)
-        self.dataframe['year'] = self.dataframe['year'].astype(int)
+        self.dataframe['Nominations'] = self.dataframe['Nominations'].astype(int)
+        self.dataframe['Awards'] = self.dataframe['Awards'].astype(int)
+        self.dataframe['Year'] = self.dataframe['Year'].astype(int)
 
     def __load(self):
         for row in self.dataframe.to_numpy():
-            query = "INSERT INTO oscars (film_title, film_nominations, film_awards, year) " \
+            query = "INSERT INTO oscars (film_title, year, film_nominations, film_awards) " \
                     "VALUES (\"%s\", %s, %s, %s)" \
                     % (row[0], row[1], row[2], row[3])
             self.connection.execute(query)

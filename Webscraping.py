@@ -13,6 +13,9 @@ class Webscraping:
         self.initial_scrape()
         return self.dataframe
 
+    def get_links(self):
+        return self.links
+
     def initial_scrape(self):
 
         # URL de la página que queremos hacer webscraping

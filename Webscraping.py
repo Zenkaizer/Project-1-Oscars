@@ -6,15 +6,31 @@ from bs4 import BeautifulSoup
 class Webscraping:
 
     def __init__(self):
-        self.dataframe = None
+        self.df_initial = None
+        self.df_directors = None
+        self.df_protagonists = None
+        self.df_durations = None
+        self.df_countries = None
         self.links = []
 
-    def get_dataframe(self):
+    def start_scrape(self):
         self.initial_scrape()
-        return self.dataframe
+        self.movies_data_scrape()
 
-    def get_links(self):
-        return self.links
+    def get_df_initial(self):
+        return self.df_initial
+
+    def get_df_directors(self):
+        return self.df_directors
+
+    def get_df_protagonists(self):
+        return self.df_protagonists
+
+    def get_df_durations(self):
+        return self.df_durations
+
+    def get_df_countries(self):
+        return self.df_countries
 
     def initial_scrape(self):
 
@@ -65,4 +81,86 @@ class Webscraping:
             self.links.append(link)
 
         # Creamos un DataFrame de Pandas a partir de los datos
-        self.dataframe = pandas.DataFrame(data, columns=["title", "year", "awards", "nominations"])
+        self.df_initial = pandas.DataFrame(data, columns=["title", "year", "awards", "nominations"])
+
+    def movies_data_scrape(self):
+
+        # Creamos los DataFrames vacios para guardar la información.
+        self.df_directors = pandas.DataFrame(columns=["id_title", "directors"])
+        self.df_protagonists = pandas.DataFrame(columns=["id_title", "protagonists"])
+        self.df_durations = pandas.DataFrame(columns=["id_title", "duration"])
+        self.df_countries = pandas.DataFrame(columns=["id_title", "county"])
+
+        aux = 0
+        # Hacemos el web scraping para cada película.
+        for link in self.links:
+            # Formamos la url de la página de Wikipedia.
+            url = f"https://en.wikipedia.org{link}"
+            # Hacemos la petición a la página.
+            r = requests.get(url)
+            # Creamos el objeto BeautifulSoup.
+            soup = BeautifulSoup(r.content, 'html.parser')
+
+            # Encontramos los elementos que contienen la información.
+            elements = soup.find_all("table", {"class": "infobox vevent"})
+
+            # Creamos las listas vacias para guardar la información.
+            directors = []
+            protagonists = []
+            countries = []
+            duration = ""
+            empty = "Sin datos"
+
+            # Encontramos los elementos que contienen la información.
+            elements = soup.find_all("table", {"class": "infobox vevent"})
+
+            for element in elements:
+                for row in element.find_all("tr"):
+
+                    if row.th and "Directed by" in row.th.text:
+                        # Si los directores están en el mismo <td>.
+                        if row.td:
+                            director = row.td.text.strip()
+                            directors.append(director)
+
+                    if row.th and "Starring" in row.th.text:
+                        # Si los protagonistas están en el mismo <td>.
+                        if row.td:
+                            protagonist = row.td.text.strip()
+                            protagonists.append(protagonist)
+
+                    if row.th and "Running time" in row.th.text:
+                        duration = row.td.text.strip()
+
+                    if row.th and ("Country" in row.th.text or "Countries" in row.th.text):
+                        # Si los países están en el mismo <td>.
+                        if row.td:
+                            country = row.td.text.strip()
+                            countries.append(country)
+
+            self.__is_empty(directors, empty)
+            self.__is_empty(protagonists, empty)
+            self.__is_empty(countries, empty)
+            if duration == "":
+                duration = empty
+
+            # Agregamos la información a los DataFrames
+            new_row = {"id_title": aux + 1, "directors": directors}
+            self.df_directors = pandas.concat([self.df_directors, pandas.DataFrame(new_row)], ignore_index=True)
+            new_row = {"id_title": aux + 1, "protagonists": protagonists}
+            self.df_protagonists = pandas.concat([self.df_protagonists, pandas.DataFrame(new_row)], ignore_index=True)
+
+            self.df_durations.loc[len(self.df_durations)] = [aux + 1, duration]
+
+            new_row = {"id_title": aux + 1, "county": countries}
+            self.df_countries = pandas.concat([self.df_countries, pandas.DataFrame(new_row)],
+                                              ignore_index=True)
+
+            print(aux)
+
+            aux = aux + 1
+
+    @staticmethod
+    def __is_empty(vector, string):
+        if not vector:
+            vector.append(string)

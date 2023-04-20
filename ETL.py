@@ -9,7 +9,7 @@ class ETL:
         self.scrap = Webscraping()
 
     def __extract(self):
-        self.dataframe = self.scrap.get_dataframe()
+        self.dataframe = self.scrap.get_df_initial()
 
     def __transform(self):
         self.dataframe['Nominations'] = self.dataframe['Nominations'].astype(int)
@@ -27,3 +27,4 @@ class ETL:
         self.__extract()
         self.__transform()
         self.__load()
+

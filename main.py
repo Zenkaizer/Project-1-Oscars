@@ -1,19 +1,18 @@
-from Connection import Connection
-from ETL import ETL
+from ETL.DirectorsETL import DirectorsETL
 from Webscraping import Webscraping
 from TimeETL import TimeETL
-import pandas
-from ProtagonistETL import ProtagonistETL
+from ETL.ProtagonistETL import ProtagonistETL
 webos = Webscraping()
 time = TimeETL()
 pro = ProtagonistETL()
+dire = DirectorsETL()
 
 webos.start_scrape()
 
-pro.extract(webos.get_df_protagonists())
-pro.transform()
-print(pro.get_dataframe())
-pro.get_dataframe().to_csv("prueba.csv")
+dire.extract(webos.get_df_directors())
+dire.transform()
+print(dire.get_dataframe())
+dire.get_dataframe().to_csv("prueba.csv")
 
 
 

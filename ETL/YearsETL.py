@@ -15,9 +15,7 @@ class YearsETL:
         self.dataframe = self.dataframe.drop_duplicates(subset='year')
         self.dataframe = self.dataframe.reset_index(drop=True)
         self.dataframe['id'] = self.dataframe.index + 1
-        self.dataframe = self.dataframe[['year', 'id_title']]
-
-        self.dataframe['id_title'] = self.dataframe['id'].astype(int)
+        self.dataframe['id'] = self.dataframe['id'].astype(int)
         self.dataframe['year'] = self.dataframe['year'].astype(int)
 
     def __load(self):

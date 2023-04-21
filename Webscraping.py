@@ -94,8 +94,6 @@ class Webscraping:
         aux = 0
         # Hacemos el web scraping para cada película.
         for link in self.links:
-            if aux == 25:
-                break
 
             # Formamos la url de la página de Wikipedia.
             url = f"https://en.wikipedia.org{link}"
@@ -160,7 +158,6 @@ class Webscraping:
                                               ignore_index=True)
 
             print(aux)
-
             aux = aux + 1
 
     @staticmethod

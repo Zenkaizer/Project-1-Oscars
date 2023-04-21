@@ -1,29 +1,30 @@
-from ETL.DirectorsETL import DirectorsETL
+from Connection import Connection
+from ETL.FilmETL import FilmETL
 from Webscraping import Webscraping
-from TimeETL import TimeETL
+from ETL.CountriesETL import CountriesETL
+from ETL.DirectorsETL import DirectorsETL
+from ETL.YearsETL import YearsETL
 from ETL.ProtagonistETL import ProtagonistETL
-webos = Webscraping()
-time = TimeETL()
-pro = ProtagonistETL()
-dire = DirectorsETL()
 
-webos.start_scrape()
-
-dire.extract(webos.get_df_directors())
-dire.transform()
-print(dire.get_dataframe())
-dire.get_dataframe().to_csv("prueba.csv")
-
-
-
+film_etl = FilmETL()
 """
-connection = Connection()
-
 with open('scripts/star_schema.sql', 'r') as file:
     for line in file.read().split(';'):
         connection.execute(line)
-
-etl = ETL(connection)
-
-etl.start()
 """
+
+web_scrap = Webscraping()
+web_scrap.start_scrape()
+
+df_initial = web_scrap.get_df_initial()
+df_protagonists = web_scrap.get_df_protagonists()
+df_directors = web_scrap.get_df_directors()
+df_countries = web_scrap.get_df_countries()
+df_durations = web_scrap.get_df_durations()
+
+
+film_etl.start_etl(df_initial, df_durations, df_protagonists, df_directors, df_countries)
+
+df_result = film_etl.get_dataframe()
+
+df_result.to_csv("resultado.csv")

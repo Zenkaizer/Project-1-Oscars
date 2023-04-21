@@ -2,14 +2,19 @@ import re
 
 
 class DirectorsETL:
-    def __init__(self):
+    def __init__(self, connection):
         self.dataframe = None
-        self.connection = None
+        self.connection = connection
 
-    def extract(self, df_directors):
+    def start_etl(self, df_directors):
+        self.__extract(df_directors)
+        self.__transform()
+        self.__load()
+
+    def __extract(self, df_directors):
         self.dataframe = df_directors
 
-    def transform(self):
+    def __transform(self):
 
         for i, row in self.dataframe.iterrows():
 
@@ -26,15 +31,20 @@ class DirectorsETL:
                 patron2 = r"([A-Z][a-z]+)\s+([A-Z][a-z]+)"
                 full_names = re.findall(patron2, result)
 
-                # Convertir la lista de tuplas de nombres completos en una lista de strings de nombres completos
-                full_names = [" ".join(nombre) for nombre in full_names]
-                self.dataframe.at[i, 'directors'] = full_names
+                if not full_names:
+                    full_names.append(chain)
+                    self.dataframe.at[i, 'directors'] = full_names
+                else:
+                    # Convertir la lista de tuplas de nombres completos en una lista de strings de nombres completos
+                    full_names = [" ".join(nombre) for nombre in full_names]
+                    self.dataframe.at[i, 'directors'] = full_names
 
         self.dataframe = self.dataframe.explode('directors').reset_index(drop=True)
+        self.dataframe['id_title'] = self.dataframe['id_title'].astype(int)
 
     def __load(self):
         for row in self.dataframe.to_numpy():
-            query = "INSERT INTO directors (id_film, protagonists) " \
+            query = "INSERT INTO directors (id_title, protagonists) " \
                     "VALUES (%s, \"%s\")" \
                     % (row[0], row[1])
             self.connection.execute(query)
@@ -51,10 +61,7 @@ class DirectorsETL:
 
     @staticmethod
     def __is_upper(string):
-        upper = 0
-        for character in string:
-            if character.isupper():
-                upper += 1
-                if upper > 1:
-                    return False
-        return upper == 1
+        if re.search(r'^[^A-Z]*[A-Z][^A-Z]*$', string):
+            return True
+        else:
+            return False

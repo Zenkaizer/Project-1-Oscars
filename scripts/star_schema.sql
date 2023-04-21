@@ -3,9 +3,14 @@ DROP TABLE IF EXISTS countries CASCADE;
 DROP TABLE IF EXISTS protagonists CASCADE;
 DROP TABLE IF EXISTS director CASCADE;
 DROP TABLE IF EXISTS films CASCADE;
-CREATE TABLE years (
-  id                int(10) NOT NULL,
+CREATE TABLE film (
+  id                int(10) NOT NULL AUTO_INCREMENT,
+  title             int(10) NOT NULL,
   year              int(10) NOT NULL,
+  title             int(10) NOT NULL,
+  title             int(10) NOT NULL,
+  title             int(10) NOT NULL,
+
   PRIMARY KEY (id));
 DROP TABLE IF EXISTS oscars CASCADE;
 CREATE TABLE countries (

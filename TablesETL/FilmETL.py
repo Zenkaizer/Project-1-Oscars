@@ -77,35 +77,6 @@ class FilmETL:
         df_protagonists['id_title'] = df_protagonists['id_title'].astype(int)
         return df_protagonists
 
-    def __transform_directors(self, df_directors):
-
-        for i, row in df_directors.iterrows():
-
-            chain = row['directors']
-
-            if "\n" in chain:
-                df_directors.at[i, 'directors'] = chain.split("\n")
-            elif self.__is_upper(chain):
-                continue
-            else:
-
-                patron = r"Mc([A-Z]|$)"
-                result = re.sub(patron, self.__convert_lower, chain)
-                patron2 = r"([A-Z][a-z]+)\s+([A-Z][a-z]+)"
-                full_names = re.findall(patron2, result)
-
-                if not full_names:
-                    full_names.append(chain)
-                    df_directors.at[i, 'directors'] = full_names
-                else:
-                    # Convertir la lista de tuplas de nombres completos en una lista de strings de nombres completos
-                    full_names = [" ".join(nombre) for nombre in full_names]
-                    df_directors.at[i, 'directors'] = full_names
-
-        df_directors = df_directors.explode('directors').reset_index(drop=True)
-        df_directors['id_title'] = df_directors['id_title'].astype(int)
-        return df_directors
-
     def __transform_countries(self, df_countries):
         self.__separate_countries(df_countries)
         df_countries = df_countries.explode('county').reset_index(drop=True)
@@ -164,7 +135,7 @@ class FilmETL:
                 else:
                     # Convertir la lista de tuplas de nombres completos en una lista de strings de nombres completos
                     full_names = ["".join(nombre) for nombre in full_names]
-                    df_countries.at[i, 'county'] = full_names
+                    df_countries.at[i, 'county'] = full_names[0]
 
     @staticmethod
     def __eliminate_brackets(string):

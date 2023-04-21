@@ -15,7 +15,6 @@ class ProtagonistETL:
         self.dataframe = df_protagonists
 
     def __transform(self):
-
         for i, row in self.dataframe.iterrows():
 
             chain = row['protagonists']
@@ -69,4 +68,3 @@ class ProtagonistETL:
             return True
         else:
             return False
-

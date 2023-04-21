@@ -1,10 +1,10 @@
 from Connection import Connection
-from ETL.FilmETL import FilmETL
+from TablesETL.FilmETL import FilmETL
 from Webscraping import Webscraping
-from ETL.CountriesETL import CountriesETL
-from ETL.DirectorsETL import DirectorsETL
-from ETL.YearsETL import YearsETL
-from ETL.ProtagonistETL import ProtagonistETL
+from TablesETL.CountriesETL import CountriesETL
+from TablesETL.DirectorsETL import DirectorsETL
+from TablesETL.YearsETL import YearsETL
+from TablesETL.ProtagonistETL import ProtagonistETL
 
 film_etl = FilmETL()
 """

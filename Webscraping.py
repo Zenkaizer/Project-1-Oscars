@@ -86,10 +86,10 @@ class Webscraping:
     def movies_data_scrape(self):
 
         # Creamos los DataFrames vacios para guardar la información.
-        self.df_directors = pandas.DataFrame(columns=["id_title", "directors"])
-        self.df_protagonists = pandas.DataFrame(columns=["id_title", "protagonists"])
-        self.df_durations = pandas.DataFrame(columns=["id_title", "duration"])
-        self.df_countries = pandas.DataFrame(columns=["id_title", "county"])
+        self.df_directors = pandas.DataFrame(columns=["id_film", "directors"])
+        self.df_protagonists = pandas.DataFrame(columns=["id_film", "protagonists"])
+        self.df_durations = pandas.DataFrame(columns=["id_film", "duration"])
+        self.df_countries = pandas.DataFrame(columns=["id_film", "county"])
 
         aux = 0
         # Hacemos el web scraping para cada película.
@@ -146,14 +146,14 @@ class Webscraping:
                 duration = empty
 
             # Agregamos la información a los DataFrames
-            new_row = {"id_title": aux + 1, "directors": directors}
+            new_row = {"id_film": aux + 1, "directors": directors}
             self.df_directors = pandas.concat([self.df_directors, pandas.DataFrame(new_row)], ignore_index=True)
-            new_row = {"id_title": aux + 1, "protagonists": protagonists}
+            new_row = {"id_film": aux + 1, "protagonists": protagonists}
             self.df_protagonists = pandas.concat([self.df_protagonists, pandas.DataFrame(new_row)], ignore_index=True)
 
             self.df_durations.loc[len(self.df_durations)] = [aux + 1, duration]
 
-            new_row = {"id_title": aux + 1, "county": countries}
+            new_row = {"id_film": aux + 1, "county": countries}
             self.df_countries = pandas.concat([self.df_countries, pandas.DataFrame(new_row)],
                                               ignore_index=True)
 

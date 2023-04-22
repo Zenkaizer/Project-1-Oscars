@@ -20,11 +20,15 @@ web_scrap = Webscraping()
 web_scrap.start_scrape()
 
 df_initial = web_scrap.get_df_initial()
+df_durations = web_scrap.get_df_durations()
+
 df_protagonists = web_scrap.get_df_protagonists()
 df_directors = web_scrap.get_df_directors()
 df_countries = web_scrap.get_df_countries()
-df_durations = web_scrap.get_df_durations()
 
+df_protagonists_copia = df_protagonists.copy()
+df_directors_copia = df_directors.copy()
+df_countries_copia = df_countries.copy()
 # endregion
 
 """
@@ -40,7 +44,7 @@ film_director_etl = FilmDirectors(connection)
 director_etl = Director(connection)
 
 director_etl.start_etl(df_directors)
-film_director_etl.start_etl(df_directors, director_etl.get_dataframe())
+film_director_etl.start_etl(df_directors_copia, director_etl.get_dataframe())
 
 """
 Protagonists ETL
@@ -50,7 +54,7 @@ film_protagonist_etl = FilmProtagonists(connection)
 protagonist_etl = Protagonist(connection)
 
 protagonist_etl.start_etl(df_protagonists)
-film_protagonist_etl.start_etl(df_protagonists, protagonist_etl.get_dataframe())
+film_protagonist_etl.start_etl(df_protagonists_copia, protagonist_etl.get_dataframe())
 
 """
 Countries ETL
@@ -60,4 +64,4 @@ film_country_etl = FilmCountries(connection)
 country_etl = Country(connection)
 
 country_etl.start_etl(df_countries)
-film_country_etl.start_etl(df_countries, country_etl.get_dataframe())
+film_country_etl.start_etl(df_countries_copia, country_etl.get_dataframe())

@@ -24,10 +24,11 @@ class FilmCountries:
         mapping = dict(zip(new_df_countries['county'], new_df_countries['id']))
         self.dataframe['id_county'] = self.dataframe['county'].map(mapping)
         self.dataframe = self.dataframe.drop('county', axis=1)
+        print(self.dataframe)
 
     def __load(self):
         for row in self.dataframe.to_numpy():
-            query = "INSERT INTO film_country (id_film, id_county) " \
+            query = "INSERT INTO film_country (id_film, id_country) " \
                     "VALUES (%s, %s)" \
                     % (row[0], row[1])
             self.connection.execute(query)

@@ -11,11 +11,14 @@ class Webscraping:
         self.df_protagonists = None
         self.df_durations = None
         self.df_countries = None
+        self.df_categories = None
         self.links = []
+        self.movies_names = []
 
     def start_scrape(self):
         self.initial_scrape()
         self.movies_data_scrape()
+        self.category_awards_scrape()
 
     def get_df_initial(self):
         return self.df_initial
@@ -31,6 +34,9 @@ class Webscraping:
 
     def get_df_countries(self):
         return self.df_countries
+
+    def get_df_categories(self):
+        return self.df_categories
 
     def initial_scrape(self):
 
@@ -79,6 +85,7 @@ class Webscraping:
             # Añadimos los datos de la película a la lista
             data.append([title, year, awards, nominations])
             self.links.append(link)
+            self.movies_names.append(title.strip())
 
         # Creamos un DataFrame de Pandas a partir de los datos
         self.df_initial = pandas.DataFrame(data, columns=["title", "year", "awards", "nominations"])
@@ -160,6 +167,32 @@ class Webscraping:
 
             print(aux)
             aux = aux + 1
+
+    def category_awards_scrape(self):
+
+        url = "https://en.wikipedia.org/wiki/Academy_Awards"
+        response = requests.get(url)
+
+        soup = BeautifulSoup(response.content, "html.parser")
+
+        # Find the table containing the categories
+        table = soup.find("table", {"class": "wikitable"})
+
+        # Get all the rows of the table
+        rows = table.find_all("tr")
+
+        # Extract the category names from the rows
+        categories = []
+        for row in rows:
+            # Skip the header row
+            if "Category" not in str(row):
+                # Get the second column, which contains the category name
+                category = row.find_all("td")[1].text.strip()
+                categories.append(category)
+
+        # Create a DataFrame with the categories
+        self.df_categories = pandas.DataFrame({"category": categories})
+
 
     @staticmethod
     def __is_empty(vector, string):

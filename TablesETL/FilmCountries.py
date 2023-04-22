@@ -20,11 +20,14 @@ class FilmCountries:
 
     def __transform(self, new_df_countries):
         self.__separate_countries(self.dataframe)
-        self.dataframe = self.dataframe.explode('county').reset_index(drop=True)
-        mapping = dict(zip(new_df_countries['county'], new_df_countries['id']))
-        self.dataframe['id_county'] = self.dataframe['county'].map(mapping)
-        self.dataframe = self.dataframe.drop('county', axis=1)
-        print(self.dataframe)
+        self.dataframe = self.dataframe.explode('country').reset_index(drop=True)
+        self.dataframe['country'] = self.dataframe['country'].replace({'US': 'United States', 'UK': 'United Kingdom',
+                                                                       'Korea, Republic of': 'Korea',
+                                                                       'United Kingdom[b]': 'United Kingdom',
+                                                                       'Czechia': 'Czech Republic'})
+        mapping = dict(zip(new_df_countries['country'], new_df_countries['id']))
+        self.dataframe['id_country'] = self.dataframe['country'].map(mapping)
+        self.dataframe = self.dataframe.drop('country', axis=1)
 
     def __load(self):
         for row in self.dataframe.to_numpy():
@@ -37,14 +40,17 @@ class FilmCountries:
 
         for i, row in df_countries.iterrows():
 
-            aux_row = row['county']
+            aux_row = row['country']
 
             chain = self.__eliminate_brackets(aux_row)
 
             if "\n" in chain:
-                df_countries.at[i, 'county'] = chain.split("\n")
+                df_countries.at[i, 'country'] = chain.split("\n")
             elif "/" in chain:
-                df_countries.at[i, 'county'] = chain.split("/")
+                df_countries.at[i, 'country'] = chain.split("/")
+            elif chain == "US and UK":
+                array = ["United States", "United Kingdom"]
+                df_countries.at[i, 'country'] = array
             elif self.__is_upper(chain):
                 continue
             else:
@@ -55,11 +61,11 @@ class FilmCountries:
 
                 if not full_names:
                     full_names.append(chain)
-                    df_countries.at[i, 'county'] = full_names
+                    df_countries.at[i, 'country'] = full_names
                 else:
                     # Convertir la lista de tuplas de nombres completos en una lista de strings de nombres completos
                     full_names = ["".join(nombre) for nombre in full_names]
-                    df_countries.at[i, 'county'] = full_names
+                    df_countries.at[i, 'country'] = full_names
 
     @staticmethod
     def __is_upper(string):
@@ -113,3 +119,59 @@ class FilmCountries:
     def __remove_duplicates(arr):
         unique_items = set(arr)
         return list(unique_items)
+
+    def __spanish_country_name(self):
+        countries = {
+            'Argentina': 'Argentina',
+            'Australia': 'Australia',
+            'Austria': 'Austria',
+            'Belgium': 'Bélgica',
+            'Bosnia and Herzegovina': 'Bosnia y Herzegovina',
+            'Brazil': 'Brasil',
+            'Canada': 'Canadá',
+            'Chile': 'Chile',
+            'China': 'China',
+            'Czech Republic': 'República Checa',
+            'Denmark': 'Dinamarca',
+            'England': 'Inglaterra',
+            'Finland': 'Finlandia',
+            'France': 'Francia',
+            'Germany': 'Alemania',
+            'Hong Kong': 'Hong Kong',
+            'Hungary': 'Hungría',
+            'India': 'India',
+            'Iran': 'Irán',
+            'Ireland': 'Irlanda',
+            'Italy': 'Italia',
+            'Japan': 'Japón',
+            'Kenya': 'Kenia',
+            'Korea': 'Corea del Sur',
+            'Luxembourg': 'Luxemburgo',
+            'Mexico': 'México',
+            'Morocco': 'Marruecos',
+            'Netherlands': 'Países Bajos',
+            'New Zealand': 'Nueva Zelanda',
+            'Norway': 'Noruega',
+            'Pakistan': 'Pakistán',
+            'Peru': 'Perú',
+            'Poland': 'Polonia',
+            'Portugal': 'Portugal',
+            'Réunion': 'Unión Soviética',
+            'Romania': 'Rumania',
+            'Sin datos': 'Sin datos',
+            'Slovenia': 'Eslovenia',
+            'South Africa': 'Sudáfrica',
+            'South Sudan': 'Sudán del Sur',
+            'Spain': 'España',
+            'Sweden': 'Suecia',
+            'Switzerland': 'Suiza',
+            'Taiwan': 'Taiwán',
+            'Tunisia': 'Túnez',
+            'Turkey': 'Turquía',
+            'United Arab Emirates': 'Emiratos Árabes Unidos',
+            'United Kingdom': 'Reino Unido',
+            'United States': 'Estados Unidos',
+            'West Germany': 'Alemania Occidental',
+            'Zimbabwe': 'Zimbabue'
+        }
+        self.dataframe['country_es'] = self.dataframe['country'].map(countries)

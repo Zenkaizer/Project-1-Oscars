@@ -90,14 +90,11 @@ class Webscraping:
         self.df_directors = pandas.DataFrame(columns=["id_film", "directors"])
         self.df_protagonists = pandas.DataFrame(columns=["id_film", "protagonists"])
         self.df_durations = pandas.DataFrame(columns=["id_film", "duration"])
-        self.df_countries = pandas.DataFrame(columns=["id_film", "county"])
+        self.df_countries = pandas.DataFrame(columns=["id_film", "country"])
 
         aux = 0
         # Hacemos el web scraping para cada película.
         for link in self.links:
-
-            if aux == 15:
-                break
 
             # Formamos la url de la página de Wikipedia.
             url = f"https://en.wikipedia.org{link}"
@@ -157,7 +154,7 @@ class Webscraping:
 
             self.df_durations.loc[len(self.df_durations)] = [aux + 1, duration]
 
-            new_row = {"id_film": aux + 1, "county": countries}
+            new_row = {"id_film": aux + 1, "country": countries}
             self.df_countries = pandas.concat([self.df_countries, pandas.DataFrame(new_row)],
                                               ignore_index=True)
 

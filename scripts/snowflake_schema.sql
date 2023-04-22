@@ -1,11 +1,10 @@
-DROP TABLE IF EXISTS film;
-DROP TABLE IF EXISTS director;
-DROP TABLE IF EXISTS film_director;
-DROP TABLE IF EXISTS protagonist;
-DROP TABLE IF EXISTS film_protagonist;
-DROP TABLE IF EXISTS film_director;
-DROP TABLE IF EXISTS country;
-DROP TABLE IF EXISTS film_country;
+DROP TABLE IF EXISTS film_protagonist CASCADE;
+DROP TABLE IF EXISTS film_director CASCADE;
+DROP TABLE IF EXISTS film_country CASCADE;
+DROP TABLE IF EXISTS film CASCADE;
+DROP TABLE IF EXISTS director CASCADE;
+DROP TABLE IF EXISTS protagonist CASCADE;
+DROP TABLE IF EXISTS country CASCADE;
 CREATE TABLE film (
     id int(10) NOT NULL,
     title varchar(255) NOT NULL,
@@ -33,6 +32,7 @@ CREATE TABLE film_protagonist (
 CREATE TABLE country (
     id int(10) NOT NULL,
     country varchar(255) NOT NULL,
+    country_es varchar(255) NOT NULL,
     PRIMARY KEY (id));
 CREATE TABLE film_country (
     id_film int(10) NOT NULL,

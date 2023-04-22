@@ -33,6 +33,7 @@ class FilmProtagonists:
         for i, row in self.dataframe.iterrows():
 
             chain = row['protagonists']
+            chain = chain.replace('"', '')
 
             if "\n" in chain:
                 self.dataframe.at[i, 'protagonists'] = chain.split("\n")

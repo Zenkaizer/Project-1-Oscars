@@ -1,5 +1,4 @@
 import re
-
 import pandas
 
 
@@ -23,6 +22,9 @@ class Film:
         self.__transform(df_durations)
         self.__load()
 
+    def get_dataframe(self):
+        return self.get_dataframe()
+
     def __extract(self, df_initial):
         """
         Método de extracción, donde se extrae la información de df_initial y se almacena en la clase.
@@ -37,6 +39,7 @@ class Film:
         """
         df_durations = self.__transform_duration(df_durations)
         self.dataframe = pandas.merge(self.dataframe, df_durations, on='id_film')
+        self.dataframe['title'] = self.dataframe['title'].str.strip()
 
     def __load(self):
         """

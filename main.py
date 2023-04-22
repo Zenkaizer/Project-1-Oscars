@@ -10,12 +10,13 @@ from TablesETL.Country import Country
 
 connection = Connection()
 
-with open('scripts/star_schema.sql', 'r') as file:
+with open('scripts/snowflake_schema.sql', 'r') as file:
     for line in file.read().split(';'):
         connection.execute(line)
 
-# region Iniciar webscrape
-
+"""
+Iniciar webscraping
+"""
 web_scrap = Webscraping()
 web_scrap.start_scrape()
 
@@ -29,7 +30,6 @@ df_countries = web_scrap.get_df_countries()
 df_protagonists_copia = df_protagonists.copy()
 df_directors_copia = df_directors.copy()
 df_countries_copia = df_countries.copy()
-# endregion
 
 """
 Añadir la tabla Filmes

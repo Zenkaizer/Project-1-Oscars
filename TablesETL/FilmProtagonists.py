@@ -1,30 +1,30 @@
 import re
 
 
-class FilmDirectors:
+class FilmProtagonists:
 
     def __init__(self, connection):
         self.dataframe = None
         self.connection = connection
 
-    def start_etl(self, df_directors, new_df_directors):
-        self.__extract(df_directors)
-        self.__transform(new_df_directors)
+    def start_etl(self, df_protagonists, new_df_protagonists):
+        self.__extract(df_protagonists)
+        self.__transform(new_df_protagonists)
         self.__load()
 
-    def __extract(self, df_directors):
-        self.dataframe = df_directors
+    def __extract(self, df_protagonists):
+        self.dataframe = df_protagonists
 
-    def __transform(self, new_df_directors):
+    def __transform(self, new_df_protagonists):
 
         self.__refactor_table()
-        mapping = dict(zip(new_df_directors['directors'], new_df_directors['id']))
-        self.dataframe['id_director'] = self.dataframe['directors'].map(mapping)
-        self.dataframe = self.dataframe.drop('directors', axis=1)
+        mapping = dict(zip(new_df_protagonists['protagonists'], new_df_protagonists['id']))
+        self.dataframe['id_protagonist'] = self.dataframe['protagonists'].map(mapping)
+        self.dataframe = self.dataframe.drop('protagonists', axis=1)
 
     def __load(self):
         for row in self.dataframe.to_numpy():
-            query = "INSERT INTO film_director (id_film, id_director) " \
+            query = "INSERT INTO film_protagonist (id_film, id_protagonist) " \
                     "VALUES (%s, %s)" \
                     % (row[0], row[1])
             self.connection.execute(query)
@@ -32,12 +32,15 @@ class FilmDirectors:
     def __refactor_table(self):
         for i, row in self.dataframe.iterrows():
 
-            chain = row['directors']
+            chain = row['protagonists']
 
             if "\n" in chain:
-                self.dataframe.at[i, 'directors'] = chain.split("\n")
+                self.dataframe.at[i, 'protagonists'] = chain.split("\n")
             elif self.__is_upper(chain):
                 continue
+            elif chain == "Derek de LintMarc van UchelenMonique van de Ven":
+                array = ["Derek de Lint", "Marc van Uchelen", "Monique van de Ven"]
+                self.dataframe.at[i, 'protagonists'] = array
             else:
 
                 patron = r"Mc([A-Z]|$)"
@@ -47,13 +50,13 @@ class FilmDirectors:
 
                 if not full_names:
                     full_names.append(chain)
-                    self.dataframe.at[i, 'directors'] = full_names
+                    self.dataframe.at[i, 'protagonists'] = full_names
                 else:
                     # Convertir la lista de tuplas de nombres completos en una lista de strings de nombres completos
                     full_names = [" ".join(nombre) for nombre in full_names]
-                    self.dataframe.at[i, 'directors'] = full_names
+                    self.dataframe.at[i, 'protagonists'] = full_names
 
-        self.dataframe = self.dataframe.explode('directors').reset_index(drop=True)
+        self.dataframe = self.dataframe.explode('protagonists').reset_index(drop=True)
 
     @staticmethod
     def __convert_lower(match):

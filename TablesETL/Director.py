@@ -1,7 +1,7 @@
 import re
 
 
-class DirectorsETL:
+class Director:
     def __init__(self, connection):
         self.dataframe = None
         self.connection = connection
@@ -15,6 +15,23 @@ class DirectorsETL:
         self.dataframe = df_directors
 
     def __transform(self):
+        self.__refactor_table()
+        self.dataframe = self.dataframe.drop(['id_film'], axis=1)
+        self.dataframe = self.dataframe.drop_duplicates(subset=['directors'])
+        self.dataframe = self.dataframe.reset_index(drop=True)
+        self.dataframe['id'] = self.dataframe.index + 1
+
+    def __load(self):
+        for row in self.dataframe.to_numpy():
+            query = "INSERT INTO director (id, director) " \
+                    "VALUES (%s, \"%s\")" \
+                    % (row[1], row[0])
+            self.connection.execute(query)
+
+    def get_dataframe(self):
+        return self.dataframe
+
+    def __refactor_table(self):
         for i, row in self.dataframe.iterrows():
 
             chain = row['directors']
@@ -39,17 +56,6 @@ class DirectorsETL:
                     self.dataframe.at[i, 'directors'] = full_names
 
         self.dataframe = self.dataframe.explode('directors').reset_index(drop=True)
-        self.dataframe['id_film'] = self.dataframe['id_film'].astype(int)
-
-    def __load(self):
-        for row in self.dataframe.to_numpy():
-            query = "INSERT INTO directors (id_title, protagonists) " \
-                    "VALUES (%s, \"%s\")" \
-                    % (row[0], row[1])
-            self.connection.execute(query)
-
-    def get_dataframe(self):
-        return self.dataframe
 
     @staticmethod
     def __convert_lower(match):

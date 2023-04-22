@@ -1,7 +1,7 @@
 import re
 
 
-class ProtagonistETL:
+class Protagonist:
     def __init__(self, connection):
         self.dataframe = None
         self.connection = connection
@@ -15,6 +15,23 @@ class ProtagonistETL:
         self.dataframe = df_protagonists
 
     def __transform(self):
+        self.__refactor_table()
+        self.dataframe = self.dataframe.drop(['id_film'], axis=1)
+        self.dataframe = self.dataframe.drop_duplicates(subset=['protagonists'])
+        self.dataframe = self.dataframe.reset_index(drop=True)
+        self.dataframe['id'] = self.dataframe.index + 1
+
+    def __load(self):
+        for row in self.dataframe.to_numpy():
+            query = "INSERT INTO protagonist (id, protagonist) " \
+                    "VALUES (%s, \"%s\")" \
+                    % (row[1], row[0])
+            self.connection.execute(query)
+
+    def get_dataframe(self):
+        return self.dataframe
+
+    def __refactor_table(self):
         for i, row in self.dataframe.iterrows():
 
             chain = row['protagonists']
@@ -42,18 +59,6 @@ class ProtagonistETL:
                     self.dataframe.at[i, 'protagonists'] = full_names
 
         self.dataframe = self.dataframe.explode('protagonists').reset_index(drop=True)
-
-        self.dataframe['id_title'] = self.dataframe['id_title'].astype(int)
-
-    def __load(self):
-        for row in self.dataframe.to_numpy():
-            query = "INSERT INTO protagonists (id_title, protagonists) " \
-                    "VALUES (%s, \"%s\")" \
-                    % (row[0], row[1])
-            self.connection.execute(query)
-
-    def get_dataframe(self):
-        return self.dataframe
 
     @staticmethod
     def __convert_lower(match):

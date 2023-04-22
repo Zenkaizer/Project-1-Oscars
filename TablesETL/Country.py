@@ -3,7 +3,7 @@ import re
 import pycountry
 
 
-class CountriesETL:
+class Country:
     def __init__(self, connection):
         self.dataframe = None
         self.connection = connection
@@ -19,13 +19,16 @@ class CountriesETL:
     def __transform(self):
         self.__separate_countries(self.dataframe)
         self.dataframe = self.dataframe.explode('county').reset_index(drop=True)
-        self.dataframe['id_title'] = self.dataframe['id_title'].astype(int)
+        self.dataframe = self.dataframe.drop(['id_film'], axis=1)
+        self.dataframe = self.dataframe.drop_duplicates(subset=['county'])
+        self.dataframe = self.dataframe.reset_index(drop=True)
+        self.dataframe['id'] = self.dataframe.index + 1
 
     def __load(self):
         for row in self.dataframe.to_numpy():
-            query = "INSERT INTO countries (id, country) " \
+            query = "INSERT INTO country (id, country) " \
                     "VALUES (%s, \"%s\")" \
-                    % (row[0], row[1])
+                    % (row[1], row[0])
             self.connection.execute(query)
 
     def get_dataframe(self):

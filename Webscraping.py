@@ -82,6 +82,7 @@ class Webscraping:
 
         # Creamos un DataFrame de Pandas a partir de los datos
         self.df_initial = pandas.DataFrame(data, columns=["title", "year", "awards", "nominations"])
+        self.df_initial['id_film'] = self.df_initial.index + 1
 
     def movies_data_scrape(self):
 

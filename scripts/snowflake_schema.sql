@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS awards CASCADE;
 DROP TABLE IF EXISTS film_protagonist CASCADE;
 DROP TABLE IF EXISTS film_director CASCADE;
 DROP TABLE IF EXISTS film_country CASCADE;
@@ -6,6 +7,12 @@ DROP TABLE IF EXISTS director CASCADE;
 DROP TABLE IF EXISTS protagonist CASCADE;
 DROP TABLE IF EXISTS country CASCADE;
 DROP TABLE IF EXISTS category CASCADE;
+CREATE TABLE awards (
+    id int(10) NOT NULL,
+    year int(10) NOT NULL,
+    id_film int(10) NOT NULL,
+    id_category int(10) NOT NULL,
+    PRIMARY KEY (id));
 CREATE TABLE film (
     id int(10) NOT NULL,
     title varchar(255) NOT NULL,
@@ -44,6 +51,8 @@ CREATE TABLE category (
     category varchar(255) NOT NULL,
     category_es varchar(255) NOT NULL,
     PRIMARY KEY (id));
+ALTER TABLE awards ADD CONSTRAINT FKawards507127 FOREIGN KEY (id_film) REFERENCES film (id);
+ALTER TABLE awards ADD CONSTRAINT FKawards660477 FOREIGN KEY (id_category) REFERENCES category (id);
 ALTER TABLE film_director ADD CONSTRAINT FKfilm_direc202422 FOREIGN KEY (id_film) REFERENCES film (id);
 ALTER TABLE film_director ADD CONSTRAINT FKfilm_direc550567 FOREIGN KEY (id_director) REFERENCES director (id);
 ALTER TABLE film_protagonist ADD CONSTRAINT FKfilm_prota141142 FOREIGN KEY (id_film) REFERENCES film (id);

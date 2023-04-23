@@ -1,6 +1,7 @@
 import pandas
 import requests
 from bs4 import BeautifulSoup
+import json
 
 
 class Webscraping:
@@ -11,14 +12,15 @@ class Webscraping:
         self.df_protagonists = None
         self.df_durations = None
         self.df_countries = None
-        self.df_categories = None
+        self.df_awards = None
         self.links = []
+        self.category_links = []
         self.movies_names = []
 
     def start_scrape(self):
         self.initial_scrape()
         self.movies_data_scrape()
-        self.category_awards_scrape()
+        self.awards_film_scrape()
 
     def get_df_initial(self):
         return self.df_initial
@@ -35,8 +37,8 @@ class Webscraping:
     def get_df_countries(self):
         return self.df_countries
 
-    def get_df_categories(self):
-        return self.df_categories
+    def get_df_awards(self):
+        return self.df_awards
 
     def initial_scrape(self):
 
@@ -168,31 +170,29 @@ class Webscraping:
             print(aux)
             aux = aux + 1
 
-    def category_awards_scrape(self):
+    def awards_film_scrape(self):
 
-        url = "https://en.wikipedia.org/wiki/Academy_Awards"
-        response = requests.get(url)
+        url = 'https://www.oscars.org/oscars/ceremonies/1980'
+        data = []
 
-        soup = BeautifulSoup(response.content, "html.parser")
+        for year in range(1980, 2024):
+            url = f'https://www.oscars.org/oscars/ceremonies/{year}'
+            page = requests.get(url)
+            soup = BeautifulSoup(page.content, 'html.parser')
+            categories = soup.find_all('div', {'class': 'view-grouping'})
 
-        # Find the table containing the categories
-        table = soup.find("table", {"class": "wikitable"})
+            for category in categories:
+                category_name = category.find('h2').text
+                nominado1 = category.find('h4').text
+                nominado2 = category.find_all('span')[1].text
 
-        # Get all the rows of the table
-        rows = table.find_all("tr")
+                data.append({'year': year, 'category': category_name, 'winner': nominado1, 'winner2': nominado2})
+                if category_name == "Writing (Screenplay Written Directly for the Screen)":
+                    break
+                if category_name == "Writing (Original Screenplay)":
+                    break
 
-        # Extract the category names from the rows
-        categories = []
-        for row in rows:
-            # Skip the header row
-            if "Category" not in str(row):
-                # Get the second column, which contains the category name
-                category = row.find_all("td")[1].text.strip()
-                categories.append(category)
-
-        # Create a DataFrame with the categories
-        self.df_categories = pandas.DataFrame({"category": categories})
-
+        self.df_awards = pandas.DataFrame(data)
 
     @staticmethod
     def __is_empty(vector, string):

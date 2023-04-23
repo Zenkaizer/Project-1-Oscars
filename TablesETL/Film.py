@@ -23,7 +23,7 @@ class Film:
         self.__load()
 
     def get_dataframe(self):
-        return self.get_dataframe()
+        return self.dataframe
 
     def __extract(self, df_initial):
         """

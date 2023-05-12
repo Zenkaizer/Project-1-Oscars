@@ -1,6 +1,6 @@
 # Project 1 - Oscars
 
-Foobar is a Python library for dealing with word pluralization.
+This project was developed for the subject of "Proyecto: Diseño de Sistema de Inteligencia de Negocios."
 
 ## Clone the repository:
 

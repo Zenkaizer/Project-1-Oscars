@@ -1,0 +1,70 @@
+@startuml
+
+skin rose
+skinparam linetype ortho
+skinparam DefaultTextAlignment center
+skinparam Shadowing false
+skinparam ArrowColor black
+
+entity "awards" {
+  +id (PK) int(10)
+  year int(10)
+  id_film int(10)
+  id_category int(10)
+}
+
+entity "film" {
+  +id (PK) int(10)
+  title varchar(255)
+  year int(10)
+  awards int(10)
+  nominations int(10)
+  duration int(10)
+}
+
+entity "director" {
+  +id (PK) int(10)
+  director varchar(255)
+}
+
+entity "film_director" {
+  +id_film (PK) int(10)
+  +id_director (PK) int(10)
+}
+
+entity "protagonist" {
+  +id (PK) int(10)
+  protagonist varchar(255)
+}
+
+entity "film_protagonist" {
+  +id_film (PK) int(10)
+  +id_protagonist (PK) int(10)
+}
+
+entity "country" {
+  +id (PK) int(10)
+  country varchar(255)
+  country_es varchar(255)
+}
+
+entity "film_country" {
+  +id_film (PK) int(10)
+  +id_country (PK) int(10)
+}
+
+entity "category" {
+  +id (PK) int(10)
+  category varchar(255)
+  category_es varchar(255)
+}
+
+awards ||--o{ film : id_film
+awards ||--o{ category : id_category
+film_director ||--o{ film : id_film
+film_director ||--o{ director : id_director
+film_protagonist ||--o{ film : id_film
+film_protagonist ||--o{ protagonist : id_protagonist
+film_country ||--o{ film : id_film
+film_country ||--o{ country : id_country
+@enduml

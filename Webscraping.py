@@ -1,7 +1,6 @@
 import pandas
 import requests
 from bs4 import BeautifulSoup
-import json
 
 
 class Webscraping:
@@ -158,6 +157,7 @@ class Webscraping:
             # Agregamos la información a los DataFrames
             new_row = {"id_film": aux + 1, "directors": directors}
             self.df_directors = pandas.concat([self.df_directors, pandas.DataFrame(new_row)], ignore_index=True)
+
             new_row = {"id_film": aux + 1, "protagonists": protagonists}
             self.df_protagonists = pandas.concat([self.df_protagonists, pandas.DataFrame(new_row)], ignore_index=True)
 

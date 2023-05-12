@@ -1,0 +1,204 @@
+@startuml
+left to right direction
+skin rose
+skinparam linetype ortho
+skinparam arrowthickness 2
+
+package TablesETL {
+
+    class Awards {
+      - dataframe: DataFrame
+      - connection: Connection
+
+      + Awards(connection: Connection)
+      + start_etl(df_initial: DataFrame, df_awards: DataFrame, df_categories: DataFrame): void
+      - __extract(df_awards: DataFrame): void
+      - __transform(df_initial: DataFrame, df_categories: DataFrame): void
+      - __load(): void
+      + get_dataframe(): DataFrame
+      - __normalize_titles(): void
+    }
+
+    class Category {
+      - dataframe: DataFrame
+      - connection: Connection
+
+      + Category(connection: Connection)
+      + start_etl(df_awards: DataFrame): void
+      - __extract(df_awards: DataFrame): void
+      - __transform(): void
+      - __load(): void
+      + get_dataframe(): DataFrame
+    }
+
+    class Country {
+      - dataframe: DataFrame
+      - connection: Connection
+
+      + Country(connection: Connection)
+      + start_etl(df_countries: DataFrame): void
+      - __extract(df_countries: DataFrame): void
+      - __transform(): void
+      - __load(): void
+      + get_dataframe(): DataFrame
+      - __separate_countries(df_countries: DataFrame): void
+      - __is_upper(string: str): bool
+      - __eliminate_brackets(string: str): str
+      - __find_closest_country(string: str, pos: int): str
+      - __find_closest_countries_in_list(lst: List[str]): List[str]
+      - __split_string_on_uppercase(string: str): List[str]
+      - __remove_duplicates(arr: List[str]): List[str]
+      - __spanish_country_name(): void
+    }
+
+    class Director {
+      - dataframe: DataFrame
+      - connection: Connection
+
+      + Director(connection: Connection)
+      + start_etl(df_directors: DataFrame): void
+      - __extract(df_directors: DataFrame): void
+      - __transform(): void
+      - __load(): void
+      + get_dataframe(): DataFrame
+      - __refactor_table(): void
+      + __convert_lower(match: Match): str
+      + __is_upper(string: str): bool
+    }
+
+    class Film {
+      - dataframe: DataFrame
+      - connection: Connection
+
+      + Film(connection: Connection)
+      + start_etl(df_initial: DataFrame, df_durations: DataFrame): void
+      + get_dataframe(): DataFrame
+      - __extract(df_initial: DataFrame): void
+      - __transform(df_durations: DataFrame): void
+      - __load(): void
+      - __transform_duration(df_duration: DataFrame): DataFrame
+      + __get_numbers(chain: str): int
+    }
+
+    class Protagonist {
+      - dataframe: DataFrame
+      - connection: Connection
+
+      + Protagonist(connection: Connection)
+      + start_etl(df_protagonists: DataFrame): void
+      - __extract(df_protagonists: DataFrame): void
+      - __transform(): void
+      - __load(): void
+      + get_dataframe(): DataFrame
+      - __refactor_table(): void
+      - __is_upper(string: str): bool
+      - __convert_lower(match: Match[str]): str
+    }
+
+    class FilmCountries {
+      - dataframe: DataFrame
+      - connection: Connection
+
+      + FilmCountries(connection: Connection)
+      + start_etl(df_countries: DataFrame, new_df_countries: DataFrame): void
+      - __extract(df_countries: DataFrame): void
+      - __transform(new_df_countries: DataFrame): void
+      - __load(): void
+      - __separate_countries(df_countries: DataFrame): void
+      - __is_upper(string: str): bool
+      - __eliminate_brackets(string: str): str
+      - __find_closest_country(string: str, pos: int): str
+      - __find_closest_countries_in_list(lst: List[str]): List[str]
+      - __split_string_on_uppercase(string: str): List[str]
+      - __remove_duplicates(arr: List[str]): List[str]
+      - __spanish_country_name(): void
+    }
+
+    class FilmDirectors {
+      - dataframe: DataFrame
+      - connection: Connection
+
+      + FilmDirectors(connection: Connection)
+      + start_etl(df_directors: DataFrame, new_df_directors: DataFrame): void
+      - __extract(df_directors: DataFrame): void
+      - __transform(new_df_directors: DataFrame): void
+      - __load(): void
+      - __refactor_table(): void
+      - __is_upper(string: str): bool
+      - __convert_lower(match: Match[str]): str
+    }
+
+    class FilmProtagonists {
+      - dataframe: DataFrame
+      - connection: Connection
+
+      + FilmProtagonists(connection: Connection)
+      + start_etl(df_protagonists: DataFrame, new_df_protagonists: DataFrame): void
+      - __extract(df_protagonists: DataFrame): void
+      - __transform(new_df_protagonists: DataFrame): void
+      - __load(): void
+      - __refactor_table(): void
+      - __is_upper(string: str): bool
+      - __convert_lower(match: Match[str]): str
+    }
+
+}
+
+class Connection {
+  - connection: Connection
+
+  + Connection()
+  + execute(query: str): void
+  + select(query: str): Any
+  + close(): void
+}
+
+class Webscraping {
+  - df_initial: DataFrame
+  - df_directors: DataFrame
+  - df_protagonists: DataFrame
+  - df_durations: DataFrame
+  - df_countries: DataFrame
+  - df_awards: DataFrame
+  - links: List[str]
+  - category_links: List[str]
+  - movies_names: List[str]
+
+  + start_scrape(): void
+  + get_df_initial(): DataFrame
+  + get_df_directors(): DataFrame
+  + get_df_protagonists(): DataFrame
+  + get_df_durations(): DataFrame
+  + get_df_countries(): DataFrame
+  + get_df_awards(): DataFrame
+  - __initial_scrape(): void
+  - __movies_data_scrape(): void
+  - __awards_film_scrape(): void
+  - __is_empty(vector: List, string: str): void
+}
+
+class Start {
+  - connection: Connection
+  - web_scrap: Webscraping
+
+  + start_program(): void
+  - connect(): void
+  - init_scrape(): void
+  - start(): void
+}
+
+Start --> Connection
+Start --> Webscraping
+
+Awards --> Connection
+Category --> Connection
+Country --> Connection
+Director --> Connection
+Film --> Connection
+Protagonist --> Connection
+FilmCountries --> Connection
+FilmDirectors --> Connection
+FilmProtagonists --> Connection
+
+
+@enduml

@@ -6,40 +6,74 @@ from bs4 import BeautifulSoup
 class Webscraping:
 
     def __init__(self):
+        """
+        Constructor de la clase Webscraping.
+        """
         self.df_initial = None
         self.df_directors = None
         self.df_protagonists = None
         self.df_durations = None
         self.df_countries = None
         self.df_awards = None
-        self.links = []
-        self.category_links = []
-        self.movies_names = []
+        self.links = []  # Lista que almacena los enlaces de wikipedia de cada película.
+        self.movies_names = []  # Lista que almacena los nombres de las películas.
 
     def start_scrape(self):
+        """
+        Método que inicia el webscraping de las páginas de Wikipedia sobre los oscars y oscars.org.
+        :return: None
+        """
         self.initial_scrape()
         self.movies_data_scrape()
         self.awards_film_scrape()
 
     def get_df_initial(self):
+        """
+        Método que obtiene el dataframe inicial.
+        :return: Dataframe inicial.
+        """
         return self.df_initial
 
     def get_df_directors(self):
+        """
+        Método que obtiene el dataframe de directores de las películas.
+        :return: Dataframe de directores.
+        """
         return self.df_directors
 
     def get_df_protagonists(self):
+        """
+        Método que obtiene el dataframe de protagonistas de las películas.
+        :return: Dataframe de protagonistas.
+        """
         return self.df_protagonists
 
     def get_df_durations(self):
+        """
+        Método que obtiene el dataframe de duraciones de las películas.
+        :return: Dataframe de duración.
+        """
         return self.df_durations
 
     def get_df_countries(self):
+        """
+        Método que obtiene el dataframe de paises de las películas.
+        :return: Dataframe de paises.
+        """
         return self.df_countries
 
     def get_df_awards(self):
+        """
+        Método que obtiene el dataframe de cada pelicula premiada.
+        :return: Dataframe de premios.
+        """
         return self.df_awards
 
     def initial_scrape(self):
+        """
+        Método que inicia el webcraping a la tabla de ganadores de los oscars de Wikipedia.
+        :return: None
+        """
 
         # URL de la página que queremos hacer webscraping
         url = "https://en.wikipedia.org/wiki/List_of_Academy_Award-winning_films"
@@ -93,6 +127,10 @@ class Webscraping:
         self.df_initial['id_film'] = self.df_initial.index + 1
 
     def movies_data_scrape(self):
+        """
+        Método que inicia el webscraping para obtener los datos de cada película desde su página de Wikipedia.
+        :return: None
+        """
 
         # Creamos los DataFrames vacios para guardar la información.
         self.df_directors = pandas.DataFrame(columns=["id_film", "directors"])
@@ -104,6 +142,9 @@ class Webscraping:
         # Hacemos el web scraping para cada película.
         for link in self.links:
 
+            if aux == 10:
+                break
+
             # Formamos la url de la página de Wikipedia.
             url = f"https://en.wikipedia.org{link}"
             # Hacemos la petición a la página.
@@ -111,14 +152,12 @@ class Webscraping:
             # Creamos el objeto BeautifulSoup.
             soup = BeautifulSoup(r.content, 'html.parser')
 
-            # Encontramos los elementos que contienen la información.
-            elements = soup.find_all("table", {"class": "infobox vevent"})
-
             # Creamos las listas vacias para guardar la información.
             directors = []
             protagonists = []
             countries = []
             duration = ""
+            # Se define la variable "empty" para usarla en casos de que no existan datos que guardar.
             empty = "Sin datos"
 
             # Encontramos los elementos que contienen la información.
@@ -157,7 +196,6 @@ class Webscraping:
             # Agregamos la información a los DataFrames
             new_row = {"id_film": aux + 1, "directors": directors}
             self.df_directors = pandas.concat([self.df_directors, pandas.DataFrame(new_row)], ignore_index=True)
-
             new_row = {"id_film": aux + 1, "protagonists": protagonists}
             self.df_protagonists = pandas.concat([self.df_protagonists, pandas.DataFrame(new_row)], ignore_index=True)
 
@@ -166,35 +204,51 @@ class Webscraping:
             new_row = {"id_film": aux + 1, "country": countries}
             self.df_countries = pandas.concat([self.df_countries, pandas.DataFrame(new_row)],
                                               ignore_index=True)
-
+            # Solo funciona como Debug y contador de cuando va a terminar el programa: Son 613 datos.
             print(aux)
             aux = aux + 1
 
     def awards_film_scrape(self):
+        """
+        Método que inicia el webcraping de los ganadores de los oscars desde la página oficial de oscars.org.
+        :return: None
+        """
 
-        url = 'https://www.oscars.org/oscars/ceremonies/1980'
+        # Arreglo para guardar los datos
         data = []
 
+        # Se itera desde 1980 a 2023, debido a que las películas estrenadas en 2022 tuvieron su premio en 2023
         for year in range(1980, 2024):
             url = f'https://www.oscars.org/oscars/ceremonies/{year}'
             page = requests.get(url)
             soup = BeautifulSoup(page.content, 'html.parser')
             categories = soup.find_all('div', {'class': 'view-grouping'})
 
+            # Se recorre cada categoría para encontrar los campos con los datos
             for category in categories:
                 category_name = category.find('h2').text
-                nominado1 = category.find('h4').text
-                nominado2 = category.find_all('span')[1].text
+                data1 = category.find('h4').text
+                data2 = category.find_all('span')[1].text
 
-                data.append({'year': year, 'category': category_name, 'winner': nominado1, 'winner2': nominado2})
+                # Se añade a data todos los datos obtenidos en esa iteración
+                data.append({'year': year, 'category': category_name, 'winner': data1, 'winner2': data2})
+
+                # Comprobamos el nombre de la categoría para identificar de que no quedan datos.
                 if category_name == "Writing (Screenplay Written Directly for the Screen)":
                     break
                 if category_name == "Writing (Original Screenplay)":
                     break
 
+        # Transformamos el arreglo en un dataframe.
         self.df_awards = pandas.DataFrame(data)
 
     @staticmethod
     def __is_empty(vector, string):
+        """
+        Método que comprueba si una lista está vacía.
+        :param vector: Lista a comparar.
+        :param string: String que se va a insertar a la lista en caso de que esté vacía.
+        :return: None
+        """
         if not vector:
             vector.append(string)

@@ -2,21 +2,71 @@
 class Category:
 
     def __init__(self, connection):
+        """
+        Constructor de la clase Category
+        :param connection: Instancia de la conexión a la base de datos.
+        """
         self.dataframe = None
         self.connection = connection
 
     def start_etl(self, df_awards):
+        """
+        Método que inicia el proceso ETL para la tabla category.
+        :param df_awards: Dataframe de los premios.
+        :return: None
+        """
         self.__extract(df_awards)
         self.__transform()
         self.__load()
 
     def __extract(self, df_awards):
+        """
+        Método encargado de la extracción de los datos.
+        :param df_awards: Dataframe de los premios.
+        :return: None
+        """
         self.dataframe = df_awards
 
     def __transform(self):
+        """
+        Método que realiza la transformación de los datos.
+        :return: None
+        """
+
+        # Se dropean los datos y columnas que no importan
         self.dataframe = self.dataframe.drop(['year', 'winner', 'winner2'], axis=1)
         self.dataframe = self.dataframe.drop_duplicates(subset=['category'])
         self.dataframe = self.dataframe.reset_index(drop=True)
+
+        self.__spanish_names()
+
+        # Se crea una columna "id" para el dataframe
+        self.dataframe['id'] = self.dataframe.index + 1
+
+    def __load(self):
+        """
+        Método que realiza la carga a la base de datos.
+        :return: None
+        """
+        for row in self.dataframe.to_numpy():
+            query = "INSERT INTO category (id, category, category_es) " \
+                    "VALUES (%s, \"%s\", \"%s\")" \
+                    % (row[2], row[0], row[1])
+            self.connection.execute(query)
+
+    def get_dataframe(self):
+        """
+        Método que obtiene el dataframe de la clase.
+        :return: Dataframe de las categorías.
+        """
+        return self.dataframe
+
+    def __spanish_names(self):
+        """
+        Método que convierte los nombres de las categorías de los premios del inglés al español.
+        :return: None
+        """
+        # Diccionario para realizar la columna "category_es" con las categorías en español
         categories = {
             'Actor in a Leading Role': 'Actor en un Papel Principal',
             'Actor in a Supporting Role': 'Actor en un Papel de Apoyo',
@@ -67,14 +117,3 @@ class Category:
             'Papito': 'Término cariñoso en español para padre o papá'
         }
         self.dataframe['category_es'] = self.dataframe['category'].map(categories)
-        self.dataframe['id'] = self.dataframe.index + 1
-
-    def __load(self):
-        for row in self.dataframe.to_numpy():
-            query = "INSERT INTO category (id, category, category_es) " \
-                    "VALUES (%s, \"%s\", \"%s\")" \
-                    % (row[2], row[0], row[1])
-            self.connection.execute(query)
-
-    def get_dataframe(self):
-        return self.dataframe

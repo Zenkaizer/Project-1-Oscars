@@ -4,37 +4,74 @@ import numpy as np
 class Awards:
 
     def __init__(self, connection):
+        """
+        Constructor de la clase Awards.
+        :param connection: Instancia de la conexión a la base de datos.
+        """
         self.dataframe = None
         self.connection = connection
 
     def start_etl(self, df_initial, df_awards, df_categories):
+        """
+        Método que inicia el proceso ETL para la tabla awards.
+        :param df_initial: Dataframe inicial.
+        :param df_awards: Dataframe de premios.
+        :param df_categories: Dataframe de categorias de cada premio.
+        :return: None
+        """
         self.__extract(df_awards)
         self.__transform(df_initial, df_categories)
         self.__load()
 
     def __extract(self, df_awards):
+        """
+        Método encargado de la extracción de los datos.
+        :param df_awards: Dataframe de premios.
+        :return: None
+        """
         self.dataframe = df_awards
 
     def __transform(self, df_initial, df_categories):
+        """
+        Método que realiza la transformación de los datos.
+        :param df_initial: Dataframe inicial.
+        :param df_categories: Dataframe de categorias de premios.
+        :return: None
+        """
+        # Se hace un reemplazo de los string del dataframe que contengan un salto de linea por vacío
         self.dataframe = self.dataframe.applymap(lambda x: x.replace('\n', '') if isinstance(x, str) else x)
         self.__normalize_titles()
+
+        # Se eliminan los espacios laterales de la columna de títulos
         df_initial['title'] = df_initial['title'].str.strip()
 
+        # Como no se sabe si en la columna "winner" o "winner2" está el título de la película
+        # Se verifica que esté en una de las dos
         self.dataframe['id_film'] = self.dataframe.apply(lambda row: df_initial['id_film'][df_initial['title'].
                                                          isin([row['winner'], row['winner2']])].
                                                          values[0] if any(df_initial['title'].
                                                                           isin([row['winner'],
                                                                                 row['winner2']])) else None, axis=1)
 
+        # Se hace un mapeo entre el dataframe de categorias y el dataframe de premios
+        # para reemplazar el nombre de la categoría por el id.
         mapping = dict(zip(df_categories['category'], df_categories['id']))
         self.dataframe['id_category'] = self.dataframe['category'].map(mapping)
+
+        # Se dropean los datos y columnas que no importan
         self.dataframe = self.dataframe.drop(['category', 'winner', 'winner2'], axis=1)
         self.dataframe.replace(" ", np.nan, inplace=True)
         self.dataframe.dropna(inplace=True)
         self.dataframe = self.dataframe.reset_index(drop=True)
+
+        # Se crea una columna "id" para el dataframe
         self.dataframe['id'] = self.dataframe.index + 1
 
     def __load(self):
+        """
+        Método que realiza la carga a la base de datos.
+        :return: None
+        """
         for row in self.dataframe.to_numpy():
             query = "INSERT INTO awards (id, year, id_film, id_category) " \
                     "VALUES (%s, %s, %s, %s)" \
@@ -42,9 +79,18 @@ class Awards:
             self.connection.execute(query)
 
     def get_dataframe(self):
+        """
+        Método que obtiene el dataframe de la clase.
+        :return: Dataframe de los premios.
+        """
         return self.dataframe
 
     def __normalize_titles(self):
+        """
+        Método que normaliza los títulos que desde la pagina de "oscars.org" no coinciden con los extraidos
+        desde Wikipedia.
+        :return: None
+        """
         names = {
             "Volver a Empezar ('To Begin Again')": "To Begin Again (Volver a empezar)",
             "E.T. The Extra-Terrestrial": "E.T.: The Extra-Terrestrial",

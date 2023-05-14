@@ -38,7 +38,7 @@ class Start:
         self.connection = Connection()
 
         # Se abre el archivo "snowflake_schema.sql" para generar la base de datos.
-        with open('../scripts/snowflake_schema.sql', 'r') as file:
+        with open('scripts/snowflake_schema.sql', 'r') as file:
             for line in file.read().split(';'):
                 self.connection.execute(line)
 
